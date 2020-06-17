@@ -3,6 +3,7 @@
 
 json = require "cjson.safe"
 md5 = require "md5"
+redis = require "redis"
 
 -- login api
 m_login_url = "/user/login"
