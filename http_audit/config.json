@@ -1,0 +1,20 @@
+{
+    "blacklist": {
+        "hostname": "disable",
+        "url": "disable",
+        "ua": "enable",
+        "method": "disable"
+    },
+    "hostname": [
+        "canon88.github.io"
+    ],
+    "url": [
+	    "/2020/06/02/Elastalert-新增周期性检测规则/"
+    ],
+    "ua": [
+        "Cloudflare-Traffic-Manager"
+    ],
+    "method": [
+	    "GET"
+    ]
+}
