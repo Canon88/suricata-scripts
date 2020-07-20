@@ -1,18 +1,25 @@
 {
-    "blacklist": {
-        "hostname": "disable",
-        "url": "disable",
-        "ua": "enable",
-        "method": "disable"
+    "blacklist": [
+        "user-agent"
+    ],
+    "bodyrecord": {
+        "request": {
+            "enable": true,
+            "limit": 123
+        },
+        "response": {
+            "enable": false,
+            "limit": 0
+        }
     },
     "hostname": [
         "canon88.github.io"
     ],
     "url": [
-	    "/2020/06/02/Elastalert-新增周期性检测规则/"
+	   
     ],
-    "ua": [
-        "Cloudflare-Traffic-Manager"
+    "user-agent": [
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36"
     ],
     "method": [
 	    "GET"

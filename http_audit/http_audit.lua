@@ -1,10 +1,10 @@
 --[[
 @Author: Canon
 @Date: 2020-07-15 17:48:48
-@LastEditTime: 2020-07-15 17:48:48
+@LastEditTime: 2020-07-20 11:20:00
 @LastEditors: Canon
 @Description: HTTP Audit Script
-@Version: 0.1
+@Version: 0.2
 --]]
 
 json = require "cjson.safe"
@@ -89,12 +89,9 @@ function setup(args)
     
     -- common_mapping
     common_mapping_table = mapping['http_common_mapping']
-    
-    -- request_mapping
-    request_mapping_table = mapping['http_request_mapping']
-    
-    -- response_mapping
-    response_mapping_table = mapping['http_response_mapping']
+
+    -- core_mapping
+    core_mapping_table = mapping['http_core_mapping']
 end
 
 function log(args)
@@ -106,16 +103,16 @@ function log(args)
 
     -- hostname start
     http_hostname = HttpGetRequestHost()
-    if not http_hostname then
+    if http_hostname == nil then
         return
     end
 
-    if config["blacklist"]["hostname"] == "enable" then
+    if in_array("hostname", config["blacklist"]) then
         if in_array(http_hostname, config["hostname"]) then
             return
         end
     else
-        if ( not in_array("any", config["hostname"]) ) and ( not in_array(http_hostname, config["hostname"]) ) then
+        if ( next(config["hostname"]) ~= nil ) and ( not in_array(http_hostname, config["hostname"]) ) then
             return
         end
     end
@@ -124,18 +121,18 @@ function log(args)
 
     -- url start
     http_url = HttpGetRequestUriNormalized()
-    if not http_url then
+    if http_url == nil then
         return
     end
     -- get url_path
     http_url_path = string.split(http_url, "?")[1]
 
-    if config["blacklist"]["url"] == "enable" then
+    if in_array("url", config["blacklist"]) then
         if in_array(http_url_path, config["url"]) then
             return
         end
     else
-        if ( not in_array("any", config["url"]) ) and not ( in_array(http_url_path, config["url"]) ) then
+        if ( next(config["url"]) ~= nil ) and ( not in_array(http_url_path, config["url"]) ) then
             return
         end
     end
@@ -146,31 +143,28 @@ function log(args)
     -- user_agent start
     http_ua = HttpGetRequestHeader("User-Agent")
     if http_ua then
-        for _, ua in ipairs(config["ua"]) do
-            if config["blacklist"]["ua"] == "enable" then
-                if string.match(http_ua, ua) then
-                    return
-                end
-            else
-                if ( not in_array("any", config["ua"]) ) and ( not string.match(http_ua, ua) ) then
-                    return
-                end
+        if in_array("user-agent", config["blacklist"]) then
+            if in_array(http_ua, config["user-agent"]) then
+                return
+            end
+        else
+            if ( next(config["user-agent"]) ~= nil ) and ( not in_array(http_ua, config["user-agent"]) ) then
+                return
             end
         end
     end
-    http_table["user_agent"] = http_ua
     -- user_agent end
 
     -- method start
     rl = HttpGetRequestLine()
     if rl then
         http_method = string.match(rl, "%w+")
-        if config["blacklist"]["method"] == "enable" then
+        if in_array("method", config["blacklist"]) then
             if in_array(http_method, config["method"]) then
                 return
             end
         else
-            if ( not in_array("any", config["method"]) ) and ( not in_array(http_method, config["method"]) ) then
+            if ( next(config["method"]) ~= nil ) and ( not in_array(http_method, config["method"]) ) then
                 return
             end
         end
@@ -187,26 +181,20 @@ function log(args)
         http_table["protocol"] = http_protocol
     end
 
-    cookie = HttpGetRequestHeader("Cookie")
-    http_table["cookie"] = cookie
-
-    set_cookie = HttpGetResponseHeader("Set-Cookie")
-    http_table["set_cookie"] = set_cookie
-
     -- RequestHeaders
     rh = HttpGetRequestHeaders()
     if rh then
         for k, v in pairs(rh) do
             key = string.lower(k)
 
+            core_var = core_mapping_table[key]
+            if core_var then
+                http_table[core_var] = v
+            end
+    
             common_var = common_mapping_table[key]
             if common_var then
                 http_table["request"][common_var] = v
-            end
-
-            request_var = request_mapping_table[key]
-            if request_var then
-                http_table["request"][request_var] = v
             end
         end
     end
@@ -216,15 +204,38 @@ function log(args)
     if rsh then
         for k, v in pairs(rsh) do
             key = string.lower(k)
+
+            core_var = core_mapping_table[key]
+            if core_var then
+                http_table[core_var] = v
+            end
     
             common_var = common_mapping_table[key]
             if common_var then
                 http_table["response"][common_var] = v
             end
-    
-            response_var = response_mapping_table[key]
-            if response_var then
-                http_table["response"][response_var] = v
+        end
+    end
+
+
+    -- RequestBody
+    if config['bodyrecord']['request']['enable'] then
+        if http_table["method"] == "POST" then
+            a, o, e = HttpGetRequestBody()
+            if ( config['bodyrecord']['request']['limit'] == 0 ) or ( e <= config['bodyrecord']['request']['limit'] ) then
+                for n, v in ipairs(a) do
+                    http_table["request"]["body"] = v
+                end
+            end
+        end
+    end
+
+    -- ResponseBody
+    if config['bodyrecord']['response']['enable'] then
+        a, o, e = HttpGetResponseBody()
+        if ( config['bodyrecord']['response']['limit'] == 0 ) or ( e <= config['bodyrecord']['response']['limit'] ) then
+            for n, v in ipairs(a) do
+                http_table["response"]["body"] = v
             end
         end
     end
@@ -245,15 +256,13 @@ function log(args)
     has_alerts = SCFlowHasAlerts()
 
     -- true_client_ip
-    true_client_ip = HttpGetRequestHeader("True-Client-IP")
-    if true_client_ip then
-        http_table["proxy_ip"] = src_ip
-        http_table["true_client_ip"] = true_client_ip
-        src_ip = true_client_ip
+    if http_table["true-client-ip"] then
+        http_table["proxy-ip"] = src_ip
+        src_ip = http_table["true-client-ip"]
     end
 
-    http_table["response"]["content_length"] = tonumber(http_table["response"]["content_length"])
-    http_table["request"]["content_length"] = tonumber(http_table["request"]["content_length"])
+    http_table["request"]["content-length"] = tonumber(http_table["request"]["content-length"])
+    http_table["response"]["content-length"] = tonumber(http_table["response"]["content-length"])
 
     -- session_id
     session_id = md5Encode(src_ip .. http_hostname)
