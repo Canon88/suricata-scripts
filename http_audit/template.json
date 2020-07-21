@@ -36,7 +36,7 @@
         "last-modified": "last-modified",
         "location": "location",
         "proxy-authenticate": "proxy-authenticate",
-        "referrer": "refer",
+        "referer": "refer",
         "retry-after": "retry-after",
         "server": "server",
         "transfer-encoding": "transfer-encoding",

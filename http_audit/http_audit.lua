@@ -1,10 +1,10 @@
 --[[
 @Author: Canon
 @Date: 2020-07-15 17:48:48
-@LastEditTime: 2020-07-20 11:20:00
+@LastEditTime: 2020-07-21 16:47:00
 @LastEditors: Canon
 @Description: HTTP Audit Script
-@Version: 0.2
+@Version: 0.3
 --]]
 
 json = require "cjson.safe"
@@ -222,9 +222,24 @@ function log(args)
     if config['bodyrecord']['request']['enable'] then
         if http_table["method"] == "POST" then
             a, o, e = HttpGetRequestBody()
-            if ( config['bodyrecord']['request']['limit'] == 0 ) or ( e <= config['bodyrecord']['request']['limit'] ) then
-                for n, v in ipairs(a) do
-                    http_table["request"]["body"] = v
+            if e ~= nil then
+                http_table["request"]["bytes"] = v
+                
+                content_type = http_table["request"]["content-type"]
+                if in_array("content-type", config["blacklist"]) then
+                    if in_array(content_type, config["content-type"]) then
+                        return
+                    end
+                else
+                    if ( next(config["content-type"]) ~= nil ) and ( not in_array(content_type, config["content-type"]) ) then
+                        return
+                    end
+                end
+
+                if ( config['bodyrecord']['request']['limit'] == 0 ) or ( e <= config['bodyrecord']['request']['limit'] ) then
+                    for n, v in ipairs(a) do
+                        http_table["request"]["body"] = v
+                    end
                 end
             end
         end
@@ -233,9 +248,12 @@ function log(args)
     -- ResponseBody
     if config['bodyrecord']['response']['enable'] then
         a, o, e = HttpGetResponseBody()
-        if ( config['bodyrecord']['response']['limit'] == 0 ) or ( e <= config['bodyrecord']['response']['limit'] ) then
-            for n, v in ipairs(a) do
-                http_table["response"]["body"] = v
+        if e ~= nil then
+            http_table["response"]["bytes"] = v
+            if ( config['bodyrecord']['response']['limit'] == 0 ) or ( e <= config['bodyrecord']['response']['limit'] ) then
+                for n, v in ipairs(a) do
+                    http_table["response"]["body"] = v
+                end
             end
         end
     end
