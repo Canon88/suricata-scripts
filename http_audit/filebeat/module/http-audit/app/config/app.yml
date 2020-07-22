@@ -1,0 +1,107 @@
+type: log
+paths:
+{{ range $i, $path := .paths }}
+ - {{$path}}
+{{ end }}
+exclude_files: [".gz$"]
+
+processors:
+  - rename:
+      fields:
+        - {from: message, to: event.original}
+  - decode_json_fields:
+      fields: [event.original]
+      target: nta.audit
+      # process_array: true
+      # max_depth: 2
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: rename
+      fields:
+        - {from: nta.audit.src_ip, to: source.address}
+        - {from: nta.audit.src_port, to: source.port, type: long}
+        - {from: nta.audit.dest_ip, to: destination.address}
+        - {from: nta.audit.dest_port, to: destination.port, type: long}
+        - {from: nta.audit.proto, to: network.transport}
+
+  # add new fields
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
+        - {from: nta.audit.http.hostname, to: http.request.hostname}
+        - {from: nta.audit.http.url, to: http.request.url}
+        - {from: nta.audit.http.url_path, to: http.request.url_path}
+        - {from: nta.audit.http.request.content_type, to: http.request.content_type}
+        - {from: nta.audit.http.response.content_type, to: http.response.content_type}
+
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
+        - {from: nta.audit.http.method, to: http.request.method}
+        - {from: nta.audit.http.refer, to: http.request.referer}
+        - {from: nta.audit.http.status, to: http.response.status_code}
+        #- {from: nta.audit.http.version, to: http.version} # TODO: add lua scripts
+
+        - {from: nta.audit.http.request.content_length, to: http.request.body.bytes}
+        - {from: nta.audit.http.request.body.content, to: http.request.body.content}
+
+        - {from: nta.audit.http.response.content_length, to: http.response.body.bytes}
+        - {from: nta.audit.http.response.body.content, to: http.response.body.content}
+        
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
+        - {from: nta.audit.http.hostname, to: url.domain}
+        - {from: nta.audit.http.url, to: url.original}
+        - {from: nta.audit.http.url_path, to: url.path}
+
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
+        - {from: source.address, to: source.ip, type: ip}
+        - {from: destination.address, to: destination.ip, type: ip}
+        - {from: '@timestamp', to: event.created}
+  - timestamp:
+      field: nta.audit.timestamp
+      layouts:
+        - '2006-01-02T15:04:05.999999999Z0700' # ISO8601
+  - drop_fields:
+      fields:
+        - nta.audit.timestamp
+  - add_fields:
+      target: network
+      fields:
+        protocol: 'http'
+  - add_fields:
+      target: event
+      fields:
+        module: 'audit'
+  - add_fields:
+      target: event
+      fields:
+        kind: 'event'
+  - add_fields:
+      target: event
+      fields:
+        action: 'audit'
+  - add_fields:
+      target: event
+      fields:
+        category:
+          - 'network'
+          - 'web'
+  - add_fields:
+      target: event
+      fields:
+        type:
+          - 'access'
+          - 'protocol'

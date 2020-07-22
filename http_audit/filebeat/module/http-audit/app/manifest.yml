@@ -1,0 +1,8 @@
+module_version: 0.1
+
+var:
+  - name: paths
+    default:
+      - /data/logs/suricata/app_audit.json
+
+input: config/app.yml
