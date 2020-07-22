@@ -1,10 +1,10 @@
 --[[
 @Author: Canon
-@Date: 2020-07-15 17:48:48
+@Date: 2020-07-15 22:48:48
 @LastEditTime: 2020-07-21 16:47:00
 @LastEditors: Canon
 @Description: HTTP Audit Script
-@Version: 0.3
+@Version: 0.4
 --]]
 
 json = require "cjson.safe"
@@ -97,8 +97,12 @@ end
 function log(args)
     -- init tables
     http_table = {
-        request = {},
-        response = {}
+        request = {
+            body = {}
+        },
+        response = {
+            body = {}
+        }
     }
 
     -- hostname start
@@ -223,9 +227,7 @@ function log(args)
         if http_table["method"] == "POST" then
             a, o, e = HttpGetRequestBody()
             if e ~= nil then
-                http_table["request"]["bytes"] = v
-                
-                content_type = http_table["request"]["content-type"]
+                content_type = http_table["request"]["content_type"]
                 if in_array("content-type", config["blacklist"]) then
                     if in_array(content_type, config["content-type"]) then
                         return
@@ -238,7 +240,7 @@ function log(args)
 
                 if ( config['bodyrecord']['request']['limit'] == 0 ) or ( e <= config['bodyrecord']['request']['limit'] ) then
                     for n, v in ipairs(a) do
-                        http_table["request"]["body"] = v
+                        http_table["request"]["body"]["content"] = v
                     end
                 end
             end
@@ -249,10 +251,9 @@ function log(args)
     if config['bodyrecord']['response']['enable'] then
         a, o, e = HttpGetResponseBody()
         if e ~= nil then
-            http_table["response"]["bytes"] = v
             if ( config['bodyrecord']['response']['limit'] == 0 ) or ( e <= config['bodyrecord']['response']['limit'] ) then
                 for n, v in ipairs(a) do
-                    http_table["response"]["body"] = v
+                    http_table["response"]["body"]["content"] = v
                 end
             end
         end
@@ -274,13 +275,13 @@ function log(args)
     has_alerts = SCFlowHasAlerts()
 
     -- true_client_ip
-    if http_table["true-client-ip"] then
-        http_table["proxy-ip"] = src_ip
-        src_ip = http_table["true-client-ip"]
+    if http_table["true_client_ip"] then
+        http_table["proxy_ip"] = src_ip
+        src_ip = http_table["true_client_ip"]
     end
 
-    http_table["request"]["content-length"] = tonumber(http_table["request"]["content-length"])
-    http_table["response"]["content-length"] = tonumber(http_table["response"]["content-length"])
+    http_table["request"]["content_length"] = tonumber(http_table["request"]["content_length"])
+    http_table["response"]["content_length"] = tonumber(http_table["response"]["content_length"])
 
     -- session_id
     session_id = md5Encode(src_ip .. http_hostname)
