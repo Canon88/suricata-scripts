@@ -1,5 +1,5 @@
 {
-    "order": 2,
+    "order": 3,
     "index_patterns": [
         "nta-http-audit.*"
     ],
@@ -972,9 +972,15 @@
                         }
                     }
                 }
+            },
+            "network": {
+                "properties": {
+                    "community_id": {
+                        "type": "keyword"
+                    }
+                }
             }
         }
     },
     "aliases": {}
 }
-

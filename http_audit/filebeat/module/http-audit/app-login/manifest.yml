@@ -4,5 +4,7 @@ var:
   - name: paths
     default:
       - /data/logs/suricata/app_login_audit.json
+  - name: community_id
+    default: true
 
 input: config/app.yml

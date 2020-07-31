@@ -26,21 +26,46 @@ processors:
         - {from: nta.audit.proto, to: network.transport}
         - {from: nta.audit.ti.is_verify, to: ti.is_verify}
         - {from: nta.audit.ti.is_silent, to: ti.is_silent}
-        #- {from: nta.audit.session_id, to: network.community_id}
+
+  # add new fields
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
+        - {from: nta.audit.http.hostname, to: http.request.hostname}
+        - {from: nta.audit.http.url, to: http.request.url}
+        - {from: nta.audit.http.url_path, to: http.request.url_path}
+        - {from: nta.audit.http.request.content_type, to: http.request.content_type}
+        - {from: nta.audit.http.response.content_type, to: http.response.content_type}
+
   - convert:
       ignore_missing: true
       ignore_failure: true
       mode: copy
       fields:
         - {from: nta.audit.http.method, to: http.request.method}
-        - {from: nta.audit.http.request_content_length, to: http.request.body.bytes, type: long}
+        - {from: nta.audit.http.refer, to: http.request.referer}
         - {from: nta.audit.http.status, to: http.response.status_code}
-        - {from: nta.audit.http.results_msg, to: http.response.body.content}
+        #- {from: nta.audit.http.version, to: http.version} # TODO: add lua scripts
+
+        - {from: nta.audit.http.request.content_length, to: http.request.body.bytes}
+        - {from: nta.audit.http.request.body.content, to: http.request.body.content}
+
+        - {from: nta.audit.http.response.content_length, to: http.response.body.bytes}
+        - {from: nta.audit.http.response.body.content, to: http.response.body.content}
+
+  - convert:
+      ignore_missing: true
+      ignore_failure: true
+      mode: copy
+      fields:
         - {from: nta.audit.http.hostname, to: url.domain}
         - {from: nta.audit.http.url, to: url.original}
         - {from: nta.audit.http.url_path, to: url.path}
         - {from: nta.audit.http.email, to: user.name}
         - {from: nta.audit.http.member_id, to: user.id}
+
   - convert:
       ignore_missing: true
       ignore_failure: true
@@ -49,6 +74,7 @@ processors:
         - {from: source.address, to: source.ip, type: ip}
         - {from: destination.address, to: destination.ip, type: ip}
         - {from: '@timestamp', to: event.created}
+        
   - timestamp:
       field: nta.audit.timestamp
       layouts:
@@ -99,3 +125,6 @@ processors:
       fields:
         outcome: 'failure'
 
+{{ if .community_id }}
+  - community_id:
+{{ end }}

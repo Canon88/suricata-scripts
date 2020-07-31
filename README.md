@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-06-16 15:10:48
- * @LastEditTime: 2020-07-21 19:05:40
+ * @LastEditTime: 2020-07-31 14:53:10
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /Code/Users/canon/Documents/github/suricata-scripts/README.md
@@ -17,6 +17,7 @@
 1. 利用`lua`脚本实现HTTP Audit，主要是足够定制化；
 2. **config.json**, 支持黑白名单设置；
 3. **template.json**, 指定需要审计的内容；
+4. ADD Community ID；
 **Sample:**
 ```json
 {
