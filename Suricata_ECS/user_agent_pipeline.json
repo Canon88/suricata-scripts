@@ -1,0 +1,11 @@
+{
+    "description": "Add Suricata EVE Information.",
+    "processors": [
+        {
+        "user_agent": {
+            "ignore_missing": true,
+            "field": "user_agent.original"
+        }
+        }
+    ]
+}
