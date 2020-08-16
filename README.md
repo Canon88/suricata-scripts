@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-06-16 15:10:48
- * @LastEditTime: 2020-07-31 14:53:10
+ * @LastEditTime: 2020-08-16 12:12:17
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /Code/Users/canon/Documents/github/suricata-scripts/README.md
@@ -70,3 +70,7 @@
     "app_type": "web"
 }
 ```
+## Suricata_ECS
+**Workflow: Suricata -> Filebeat -> Logstash -> Elastic**
+1. 遵循官方的ECS格式，默认官方采用的是Filebeat -> Elastic。由于我这边利用Logstash进行统一的ETL，所以在原基础上进行了一些调整；
+2. 利用Ruby进行功能扩展；
