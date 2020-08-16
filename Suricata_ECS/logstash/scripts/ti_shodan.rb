@@ -1,8 +1,11 @@
+require "json"
 require "redis"
 require "ipaddr"
 
 def register(params)
     @expire = params["expire"]
+    @alert = params["alert_prefix"]
+    @alarm = params["alarm_prefix"]
     @spider_key = params["spider_key"]
 
     # connect to redis
@@ -30,9 +33,27 @@ def filter(event)
         return [event]
     end
 
-    if not @ti_redis.exists?(ioc) then
-        @ti_redis.setex(ioc, @expire, true)
-        @spider_redis.lpush(@spider_key, ioc)
+    if event.get("[event][kind]") == "alert" then
+        alert_ioc = @alert + ioc
+        if not @ti_redis.exists?(alert_ioc) then
+            @ti_redis.setex(alert_ioc, @expire, true)
+            @spider_redis.lpush(@spider_key, ioc)
+        end
+    end
+
+    if event.get("[event][kind]") == "alarm" then
+        raw_data = @ti_redis.get(@alarm + ioc)
+        if raw_data then
+            data = JSON.parse(raw_data)
+            if data then
+                event.set("[enrichment][services]", data["services"])
+                event.set("[enrichment][vulns]", data["vulns"])
+                event.set("[enrichment][ports]", data["ports"])
+                event.set("[enrichment][hostnames]", data["hostnames"])
+                event.set("[enrichment][domains]", data["domains"])
+                event.set("[enrichment][details]", data["details"])
+            end
+        end
     end
 
     return [event]
