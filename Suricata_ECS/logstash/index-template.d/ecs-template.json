@@ -1,5 +1,5 @@
 {
-    "version": 2,
+    "version": 3,
     "order": 1,
     "index_patterns": [
         "ecs-*"
@@ -12,8 +12,8 @@
                 }
             },
             "refresh_interval": "5s",
-            "number_of_shards": "3",
-            "number_of_replicas": "0",
+            "number_of_shards": "1",
+            "number_of_replicas": "1",
             "query": {
                 "default_field": [
                     "message",

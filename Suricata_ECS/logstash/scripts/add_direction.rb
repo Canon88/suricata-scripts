@@ -11,7 +11,7 @@ def filter(event)
     ipaddr_src = IPAddr.new src_ip
     ipaddr_dst = IPAddr.new dst_ip
 
-    # alert http $EXTERNAL_NET any -> $HOME_NET any
+    # Sample: alert http $EXTERNAL_NET any -> $HOME_NET any
     rule = event.get("[rule][description]")
     src_direction = rule.split(" ")[2]
     dst_direction = rule.split(" ")[5]
@@ -32,19 +32,15 @@ def filter(event)
     if src_private and dst_private then
         direction = "outbound"
         zone = "internal"
-        # detail = "inside_to_inside"
     elsif src_private and not dst_private then
         direction = "outbound"
         zone = "internal"
-        # detail = "inside_to_inside"
     elsif not src_private and dst_private then
         direction = "inbound"
         zone = "external"
-        # detail = "outside_to_inside"
     else
         direction = "inbound"
         zone = "external"
-        # detail = "outside_to_outside"
     end
 
     event.set("[network][direction]", direction)
