@@ -19,14 +19,16 @@ def filter(event)
     src_private = ipaddr_src.private?()
     dst_private = ipaddr_dst.private?()
     
-    if ( src_private ) and ( src_direction == "$EXTERNAL_NET" ) then
-        event.cancel
-        return []
-    end
+    if event.get("provider") == "Suricata" then
+        if ( src_private ) and ( src_direction == "$EXTERNAL_NET" ) then
+            event.cancel
+            return []
+        end
 
-    if ( dst_private ) and ( dst_direction == "$EXTERNAL_NET" ) then
-        event.cancel
-        return []
+        if ( dst_private ) and ( dst_direction == "$EXTERNAL_NET" ) then
+            event.cancel
+            return []
+        end
     end
 
     if src_private and dst_private then

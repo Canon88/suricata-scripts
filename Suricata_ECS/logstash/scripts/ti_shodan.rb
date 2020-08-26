@@ -46,12 +46,15 @@ def filter(event)
         if raw_data then
             data = JSON.parse(raw_data)
             if data then
-                event.set("[enrichment][services]", data["services"])
-                event.set("[enrichment][vulns]", data["vulns"])
-                event.set("[enrichment][ports]", data["ports"])
-                event.set("[enrichment][hostnames]", data["hostnames"])
-                event.set("[enrichment][domains]", data["domains"])
-                event.set("[enrichment][details]", data["details"])
+                event.set("[threat][hunting][services]", data["services"])
+                event.set("[threat][hunting][vulns]", data["vulns"])
+                event.set("[threat][hunting][ports]", data["ports"])
+                event.set("[threat][hunting][hostnames]", data["hostnames"])
+                event.set("[threat][hunting][domains]", data["domains"])
+                if data["details"] then
+                    details = data["details"].to_json
+                    event.set("[threat][hunting][details]", details)
+                end
             end
         end
     end
