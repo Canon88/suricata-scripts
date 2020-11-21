@@ -1,0 +1,16 @@
+filebeat.modules:
+  - module: http-audit
+    app-login:
+      enabled: true
+      var.paths: ["/data/logs/suricata/app_login_audit_demo.json"]
+    web-login:
+      enabled: true
+      var.paths: ["/data/logs/suricata/web_login_audit_demo.json"]
+
+
+output.logstash:
+  hosts: ["10.180.102.247:5020", "10.180.102.127:5020"]
+  loadbalance: true
+  worker: 4
+  compression_level: 3
+  bulk_max_size: 4096

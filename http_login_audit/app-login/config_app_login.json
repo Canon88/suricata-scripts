@@ -1,0 +1,13 @@
+{
+  "hostname": [
+    "api-service.shein.com",
+    "api-service.romwe.com"
+  ],
+  "url": [
+    "/user/common_login",
+    "/user/account/common_login"
+  ],
+  "method": [
+    "POST"
+  ]
+}
