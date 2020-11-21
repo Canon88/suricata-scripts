@@ -1,9 +1,0 @@
-{
-  "url": [
-    "/user/login",
-    "/user/auth/login"
-  ],
-  "method": [
-    "POST"
-  ]
-}
