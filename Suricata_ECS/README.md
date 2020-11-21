@@ -1,16 +1,16 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-06 15:59:11
- * @LastEditTime: 2020-08-16 11:55:52
+ * @LastEditTime: 2020-11-21 23:52:34
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /Code/Users/canon/Documents/github/suricata-scripts/Suricata_ECS/logstash/conf.d/from_suricata_to_siem/README.md
 --> 
 
-# Workflow
+#### workflow
 Suricata -> Filebeat -> Logstash -> Elastic
 
-## 利用Ruby进行功能扩展
+#### 利用Ruby进行功能扩展
 - add_direction.rb 为告警添加方向，根据IP地址以及规则同时进行判断，新增ECS字段如下；
 ```json
 {
@@ -20,10 +20,10 @@ Suricata -> Filebeat -> Logstash -> Elastic
     }
 }
 ```
-- filter_ip.rb 通过调用Redis来获取需要过滤的IP地址；
-- filter_sid.rb 同上，Suricata SID过滤；
+- siem-filter_ip.rb 通过调用Redis来获取需要过滤的IP地址；
+- siem-filter_sid.rb 通过调用Redis来获取需要过滤的规则ID；
 - normalized_http_headers.rb 针对Suricata HTTP header进行标准化；
-- ti_shodan.rb 通过Shodan进行攻击IP的丰富化；
+- siem-ti_shodan.rb 通过Shodan进行告警IP的丰富化；
 ```json
 {
     "enrichment": {
@@ -66,6 +66,14 @@ Suricata -> Filebeat -> Logstash -> Elastic
     }
 }
 ```
+
+- siem-filter_sid.rb 通过调用Redis来获取需要过滤 d规则ID；
+- siem-filter_signature.rb 通过调用Redis来获取需要过滤的规则；
+- siem-update_action.rb 通过Redis进行SIEM block规则的统一维护；
+- ti_tags.rb 对接本地威胁情报；
+- siem-add_request_id.rb 为Imperva与Suricata增加统一关联ID；
+
+
 
 ## Logstash自带的UA插件不如Elastic的方便。所以这里需要手动添加pipeline，通过Elasic处理User-Agent. 
 ```bash
