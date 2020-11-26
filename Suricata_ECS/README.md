@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-06 15:59:11
- * @LastEditTime: 2020-11-21 23:52:34
+ * @LastEditTime: 2020-11-26 14:17:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /Code/Users/canon/Documents/github/suricata-scripts/Suricata_ECS/logstash/conf.d/from_suricata_to_siem/README.md
@@ -72,6 +72,7 @@ Suricata -> Filebeat -> Logstash -> Elastic
 - siem-update_action.rb 通过Redis进行SIEM block规则的统一维护；
 - ti_tags.rb 对接本地威胁情报；
 - siem-add_request_id.rb 为Imperva与Suricata增加统一关联ID；
+- siem-filter_sensor.rb 只有白名单中的 host.name 才会推送到SIEM上. 避免短时间内新增的NTA 或者 WAF没有足够的时间做规则收敛,导致SIEM侧的API自动推送造成误封堵的现象.
 
 
 
