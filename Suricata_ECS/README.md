@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2020-08-06 15:59:11
- * @LastEditTime: 2020-11-26 14:17:35
+ * @LastEditTime: 2020-12-03 14:31:34
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /Code/Users/canon/Documents/github/suricata-scripts/Suricata_ECS/logstash/conf.d/from_suricata_to_siem/README.md
@@ -90,4 +90,19 @@ PUT _ingest/pipeline/nta-suricata-ecs
         }
     ]
 }
+```
+
+## 从filebeat更新ECS模板至ES
+参考：**[Load the Elasticsearch index template](https://www.elastic.co/guide/en/beats/filebeat/7.10/filebeat-template.html#load-template-manually)**
+```bash
+# 直接从filebeat导入到Elastic
+$ filebeat setup --index-management -E output.logstash.enabled=false -E output.elasticsearch.protocol=https -E output.elasticsearch.username=elastic -E output.elasticsearch.password=HelloWorld -E output.elasticsearch.ssl.certificate_authorities=['/etc/filebeat/certs/ca/ca.crt'] -E 'output.elasticsearch.hosts=["127.0.0.1:9200"]'
+
+Overwriting ILM policy is disabled. Set `setup.ilm.overwrite: true` for enabling.
+
+Index setup finished.
+
+# filebeat导出至本地，再上传到可以直接连接Elastic的机器上导入。
+$ filebeat export template > filebeat.template.json
+$ curl -XPUT -H 'Content-Type: application/json' http://localhost:9200/_template/filebeat-7.10.0 -d@filebeat.template.json
 ```
