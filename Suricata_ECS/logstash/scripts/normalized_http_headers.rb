@@ -7,7 +7,7 @@ def filter(event)
 
     if request_headers then
         request_headers.each do |headers|
-            name = headers['name'].downcase
+            name = headers['name'].to_s.downcase
             value = headers['value']
             request[name] = value
         end
@@ -15,7 +15,7 @@ def filter(event)
 
     if response_headers then
         response_headers.each do |headers|
-            name = headers['name'].downcase
+            name = headers['name'].to_s.downcase
             value = headers['value']
             response[name] = value
         end
