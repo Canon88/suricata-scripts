@@ -20,17 +20,21 @@ def filter(event)
     begin
         ipaddr_src = IPAddr.new src_ip
         ipaddr_dst = IPAddr.new dst_ip
+
+        # Check IP Private
+        if not ipaddr_src.private?() then
+            ioc = src_ip
+        elsif not ipaddr_dst.private?() then
+            ioc = dst_ip
+        else
+            return [event]
+        end
+
     rescue Exception => e
+        results_file = File.new("~/siem-ti_shodan_debug.txt", "a+")
+        results_file.syswrite(e.to_s + ": " + event.to_s + "\n")
         event.cancel
         return []
-    end
-
-    if not ipaddr_src.private?() then
-        ioc = src_ip
-    elsif not ipaddr_dst.private?() then
-        ioc = dst_ip
-    else
-        return [event]
     end
 
     if event.get("[event][kind]") == "alert" then
